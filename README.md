@@ -1,4 +1,4 @@
 # web-tool
 
-Demo: 
-https://rawgit.com/DavisChang/web-tool/master/window-size.html
+### Measure Screen Size: 
+[Measure Screen Size](https://davischang.github.io/web-tool/measure-screen-size.html)
