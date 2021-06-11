@@ -1,4 +1,4 @@
 # web-tool
 
 ### Measure Screen Size: 
-[Measure Screen Size](https://davischang.github.io/web-tool/measure-screen-size.html)
+[Measure Screen Size - https://davischang.github.io/web-tool/measure-screen-size.html](https://davischang.github.io/web-tool/measure-screen-size.html)
