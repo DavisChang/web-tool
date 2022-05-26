@@ -1,0 +1,24 @@
+// use this or chnage "No Environment" to "Local Env"
+@hostname = https://localhost:3000
+@api_prefix = /api/
+
+GET {{hostname}}{{api_prefix}}/v1/home/hot?page=1&psize=8
+platform: WEB
+
+###
+
+POST {{hostname}}{{api_prefix}}/v1/sns/last_live_list
+Content-Type: multipart/form-data
+platform: WEB
+
+{
+  "page": 1,
+  "psize": 20
+}
+
+###
+
+POST {{hostname}}{{api_prefix}}/daily_sign/receive
+content-type: application/json
+api-key: {{api-key}}
+platform: WEB
