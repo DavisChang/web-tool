@@ -17,14 +17,29 @@
 <script>
   (function() {
     document.addEventListener('DOMContentLoaded', () => {
-      function getData () {
-        var H = window.innerHeight;
-        var W = window.innerWidth;
+      const date = new Date();
 
-        var widthNode = document.getElementById("width");
+      const userAgent = navigator.userAgent;
+      const language = navigator.language;
+      const cookieEnabled = navigator.cookieEnabled;
+      const html5Supported = !!document.createElement('canvas').getContext;
+      const localStorageAllowed = !!window.localStorage;
+
+      const indexedDBAllowed = !!window.indexedDB;
+      const sessionStorageAllowed = !!window.sessionStorage;
+      const dateTime = date.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const timezoneOffset = date.getTimezoneOffset()
+      const audioContextSupported = !!window.AudioContext || !!window.webkitAudioContext;
+
+      function getData () {
+        let H = window.innerHeight;
+        let W = window.innerWidth;
+
+        let widthNode = document.getElementById("width");
         widthNode.innerHTML = 'Width: ' + W + ' pixel';
 
-        var heightNode = document.getElementById("height");
+        let heightNode = document.getElementById("height");
         heightNode.innerHTML = 'Height: ' + H + ' pixel';
 
         console.log('H: ', H);
@@ -37,6 +52,21 @@
         getData();
       };
 
+      function putMoreInfo() {
+        document.getElementById("userAgent").innerHTML = userAgent
+        document.getElementById("language").innerHTML = language
+        document.getElementById("cookieEnabled").innerHTML = cookieEnabled
+        document.getElementById("html5Supported").innerHTML = html5Supported
+        document.getElementById("localStorageAllowed").innerHTML = localStorageAllowed
+
+        document.getElementById("indexedDBAllowed").innerHTML = indexedDBAllowed
+        document.getElementById("sessionStorageAllowed").innerHTML = sessionStorageAllowed
+        document.getElementById("dateTime").innerHTML = dateTime
+        document.getElementById("timeZone").innerHTML = timeZone
+        document.getElementById("timezoneOffset").innerHTML = timezoneOffset
+        document.getElementById("audioContextSupported").innerHTML = audioContextSupported
+      }
+      putMoreInfo()
     }, false);
   
   })();
@@ -61,11 +91,69 @@
     height: 100vh;
     writing-mode: tb-rl;
   }
+
+  p {
+    margin: 5px 0
+  }
+
+  .info-left {
+    position: absolute;
+    margin: 10% 55% 10% 5%;
+  }
+
+  .info-right {
+    position: absolute;
+    margin: 10% 5% 10% 55%;
+  }
+
+  .label {
+    color: black;
+    text-align: center;
+  }
+
+  .value {
+    color: cornflowerblue;
+    margin-bottom: 30px;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
   <div id="width"></div>
-
   <div id="height"></div>
+  <div class="info-left">
+    <p class="label">userAgent</p>
+    <p class="value" id="userAgent"></p>
+
+    <p class="label">language</p>
+    <p class="value" id="language"></p>
+
+    <p class="label">cookieEnabled</p>
+    <p class="value" id="cookieEnabled"></p>
+
+    <p class="label">html5Supported</p>
+    <p class="value" id="html5Supported"></p>
+
+    <p class="label">localStorageAllowed</p>
+    <p class="value" id="localStorageAllowed"></p>
+  </div>
+  <div class="info-right">
+    <p class="label">indexedDBAllowed</p>
+    <p class="value" id="indexedDBAllowed"></p>
+
+    <p class="label">sessionStorageAllowed</p>
+    <p class="value" id="sessionStorageAllowed"></p>
+
+    <p class="label">dateTime</p>
+    <p class="value" id="dateTime"></p>
+
+    <p class="label">timeZone</p>
+    <p class="value" id="timeZone"></p>
+    <p class="label">timezoneOffset (local timezone offset in minutes, e.g. UTC+8 -480)</p>
+    <p class="value" id="timezoneOffset"></p>
+
+    <p class="label">audioContextSupported</p>
+    <p class="value" id="audioContextSupported"></p>
+  </div>
 </body>
 </html>
