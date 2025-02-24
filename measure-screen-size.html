@@ -34,6 +34,8 @@
 
       const referrer = document.referrer;
       const standalone = navigator.standalone;
+      const isMessageHandlers = window.webkit && !!window.webkit.messageHandlers;
+
       
       function getData () {
         let H = window.innerHeight;
@@ -71,6 +73,7 @@
 
         document.getElementById("referrer").innerHTML = referrer
         document.getElementById("standalone").innerHTML = standalone
+        document.getElementById("isMessageHandlers").innerHTML = isMessageHandlers
       }
       putMoreInfo()
     }, false);
@@ -165,8 +168,10 @@
     <p class="label">audioContextSupported</p>
     <p class="value" id="audioContextSupported"></p>
 
-    <p class="label">standalone</p>
+    <p class="label">navigator standalone</p>
     <p class="value" id="standalone"></p>
+    <p class="label">Is webkit messageHandlers</p>
+    <p class="value" id="isMessageHandlers"></p>
   </div>
 </body>
 </html>
