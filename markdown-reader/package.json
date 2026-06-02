@@ -1,0 +1,19 @@
+{
+  "name": "markdown-reader",
+  "version": "1.0.0",
+  "description": "A fast, polished Markdown reader with live preview and document analysis.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "isomorphic-dompurify": "2.16.0",
+    "marked": "^12.0.2"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
+  }
+}

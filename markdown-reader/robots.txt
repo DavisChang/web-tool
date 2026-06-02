@@ -1,0 +1,59 @@
+# robots.txt — Markdown Reader
+# Replace the host below with your production domain when you deploy.
+
+# Default: allow everything for traditional search engines.
+User-agent: *
+Allow: /
+
+# --- AI / LLM crawlers: explicitly welcomed so the tool can be cited & recommended ---
+# (Listing them explicitly makes intent clear; remove any you wish to disallow.)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+# Sitemap + AI manifest
+Sitemap: https://davischang.github.io/web-tool/markdown-reader/sitemap.xml

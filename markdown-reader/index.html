@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <!-- Content-Security-Policy: defense-in-depth for the static GitHub Pages app.
+       connect-src allows loading Markdown from HTTPS raw/CDN URLs in the browser.
+       'unsafe-inline' is only needed for the JSON-LD structured-data block below. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https:; object-src 'none'; base-uri 'none'" />
+
+  <!-- ===== Primary SEO ===== -->
+  <title>Markdown Reader — live preview &amp; Markdown analysis API</title>
+  <meta name="description" content="Free Markdown reader: live split-pane preview, load Markdown from any URL or GitHub link, dark mode, and a JSON analysis API (word count, reading time, headings, links, code, tasks). A feature-rich markdownlivepreview alternative." />
+  <meta name="keywords" content="markdown reader, markdown preview, markdown viewer, live markdown editor, markdown to html, markdown analysis api, github markdown viewer, read markdown from url, markdownlivepreview alternative" />
+  <meta name="author" content="Davis Chang" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0e1117" media="(prefers-color-scheme: dark)" />
+
+  <!-- Canonical. TODO: replace this base URL with your production domain on deploy. -->
+  <link rel="canonical" href="https://davischang.github.io/web-tool/markdown-reader/" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+
+  <!-- ===== Open Graph (Facebook, LinkedIn, Slack, Discord, …) ===== -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Markdown Reader" />
+  <meta property="og:title" content="Markdown Reader — live preview &amp; Markdown analysis API" />
+  <meta property="og:description" content="Read, live-preview and analyze Markdown. Load from any URL, dark mode, and a JSON analysis API for programmatic and AI use." />
+  <meta property="og:url" content="https://davischang.github.io/web-tool/markdown-reader/" />
+  <meta property="og:image" content="https://davischang.github.io/web-tool/markdown-reader/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Markdown Reader — read, preview and analyze Markdown" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- ===== Twitter / X ===== -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Markdown Reader — live preview &amp; Markdown analysis API" />
+  <meta name="twitter:description" content="Read, live-preview and analyze Markdown. Load from any URL, dark mode, and a JSON analysis API for programmatic and AI use." />
+  <meta name="twitter:image" content="https://davischang.github.io/web-tool/markdown-reader/og-image.svg" />
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- marked renders the client-side live preview.
+       analyzer.js computes the same analysis shape used by the optional API server.
+       DOMPurify sanitizes the rendered HTML before it touches the DOM. -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+  <script src="purify.min.js" defer></script>
+  <script src="analyzer.js" defer></script>
+  <script src="app.js" defer></script>
+
+  <!-- ===== Structured data: helps search engines & AI understand/cite the app ===== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "Markdown Reader",
+        "url": "https://davischang.github.io/web-tool/markdown-reader/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any (web browser)",
+        "browserRequirements": "Requires JavaScript",
+        "description": "A free web app to read, live-preview and analyze Markdown, with a JSON analysis API. Load Markdown from any URL or GitHub link, with dark mode and export.",
+        "image": "https://davischang.github.io/web-tool/markdown-reader/og-image.svg",
+        "inLanguage": "en",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "featureList": [
+          "Live split-pane Markdown preview",
+          "Load Markdown from a URL or GitHub link",
+          "JSON analysis API (word count, reading time, headings, links, code blocks, tasks)",
+          "Light and dark themes",
+          "Copy HTML and download as .md or .html",
+          "Embeddable in iframes and webviews"
+        ],
+        "author": { "@type": "Person", "name": "Davis Chang" }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Markdown Reader?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Markdown Reader is a free web app that renders a live preview of Markdown and computes a structured analysis of it (word count, reading time, headings, links, images, code blocks, tasks and tables). It also exposes a JSON HTTP API so other programs and AI agents can fetch and analyze Markdown programmatically."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can it read Markdown from a URL?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. On the static GitHub Pages app, paste a CORS-enabled public Markdown URL (or a GitHub blob link, which is automatically rewritten to its raw form) and it is fetched directly in the browser, then rendered and analyzed. The optional API server can fetch server-side when CORS blocks browser reads."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Markdown Reader have an API?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. POST /api/analyze accepts { markdown } and returns sanitized HTML plus an analysis object. GET /api/fetch?url= fetches Markdown from a URL and returns its raw text, sanitized HTML and analysis. GET /api/health is a health check."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is it different from markdownlivepreview.com?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Markdown Reader adds loading Markdown from a URL, a documented JSON analysis API, a table-of-contents and document statistics panel, light/dark themes, export options, and an embeddable mode for webviews — with a different, more polished UI."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I embed Markdown Reader in another app or webview?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Add ?embed=1 to the URL to hide the surrounding chrome for a clean embed in an iframe or mobile webview. You can also pass ?url= to auto-load a document and ?theme=dark or ?theme=light to force a theme."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <!-- Accessibility: skip straight to the editor with the keyboard. -->
+  <a class="skip-link" href="#editor">Skip to the Markdown editor</a>
+
+  <!-- The interactive app occupies the first viewport. -->
+  <div class="app-shell">
+    <!-- ===== Top toolbar ===== -->
+    <header class="toolbar" role="banner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">M&#8595;</span>
+        <h1 class="brand-name">Markdown&nbsp;Reader</h1>
+      </div>
+
+      <!-- URL load bar -->
+      <form id="url-form" class="url-bar" role="search" aria-label="Load Markdown from a URL">
+        <input
+          id="url-input"
+          type="url"
+          inputmode="url"
+          placeholder="Paste a Markdown or GitHub URL…"
+          aria-label="URL to fetch"
+          autocomplete="off"
+          spellcheck="false" />
+        <button id="url-load" type="submit" class="btn btn-accent">Load</button>
+      </form>
+
+      <div class="toolbar-actions" role="group" aria-label="Document actions">
+        <button id="btn-sample" class="btn" type="button" title="Load sample document">Sample</button>
+        <button id="btn-copy" class="btn" type="button" title="Copy rendered HTML to clipboard">Copy HTML</button>
+        <button id="btn-dl-md" class="btn" type="button" title="Download as .md">.md</button>
+        <button id="btn-dl-html" class="btn" type="button" title="Download as .html">.html</button>
+        <button id="btn-clear" class="btn btn-danger" type="button" title="Clear the editor">Clear</button>
+        <button id="btn-theme" class="btn btn-icon" type="button" title="Toggle light / dark theme" aria-label="Toggle theme" aria-pressed="false">
+          <span class="theme-icon-light" aria-hidden="true">&#9728;</span>
+          <span class="theme-icon-dark" aria-hidden="true">&#9789;</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ===== Inline status / toast ===== -->
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- ===== Main workspace ===== -->
+    <main class="workspace" id="workspace">
+      <!-- Editor pane -->
+      <section class="pane pane-editor" aria-label="Markdown editor">
+        <div class="pane-head">
+          <span class="pane-title">Markdown</span>
+          <span class="pane-hint" id="editor-hint">live preview as you type</span>
+        </div>
+        <textarea
+          id="editor"
+          class="editor"
+          spellcheck="false"
+          autocomplete="off"
+          autocapitalize="off"
+          aria-label="Markdown source"
+          placeholder="# Start typing Markdown…"></textarea>
+      </section>
+
+      <!-- Drag handle (desktop). Becomes inert on small screens via CSS. -->
+      <div id="gutter" class="gutter" role="separator" aria-orientation="vertical"
+           aria-label="Resize editor and preview" tabindex="0"></div>
+
+      <!-- Preview pane -->
+      <section class="pane pane-preview" aria-label="Rendered preview">
+        <div class="pane-head">
+          <span class="pane-title">Preview</span>
+          <span class="pane-hint" id="reading-time">—</span>
+        </div>
+        <article id="preview" class="preview markdown-body" tabindex="0"></article>
+      </section>
+
+      <!-- Analysis sidebar -->
+      <aside class="pane pane-analysis" aria-label="Document analysis">
+        <div class="pane-head">
+          <span class="pane-title">Analysis</span>
+          <span class="pane-hint" id="analysis-state">live</span>
+        </div>
+
+        <div class="analysis-scroll">
+          <!-- Stat grid -->
+          <div class="stat-grid">
+            <div class="stat"><span class="stat-num" id="stat-words">0</span><span class="stat-label">words</span></div>
+            <div class="stat"><span class="stat-num" id="stat-read">0</span><span class="stat-label">min read</span></div>
+            <div class="stat"><span class="stat-num" id="stat-chars">0</span><span class="stat-label">chars</span></div>
+            <div class="stat"><span class="stat-num" id="stat-lines">0</span><span class="stat-label">lines</span></div>
+          </div>
+
+          <ul class="meta-list">
+            <li><span>Chars (no spaces)</span><b id="stat-chars-ns">0</b></li>
+            <li><span>Links</span><b id="stat-links">0</b></li>
+            <li><span>Images</span><b id="stat-images">0</b></li>
+            <li><span>Tables</span><b id="stat-tables">0</b></li>
+            <li><span>Code blocks</span><b id="stat-code">0</b></li>
+          </ul>
+
+          <!-- Task progress -->
+          <section class="analysis-section" id="tasks-section" hidden>
+            <h2 class="analysis-h">Tasks</h2>
+            <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="task-bar" aria-label="Task completion">
+              <div class="progress-fill" id="task-fill"></div>
+            </div>
+            <p class="progress-label" id="task-label">0 / 0 done</p>
+          </section>
+
+          <!-- Code languages -->
+          <section class="analysis-section" id="langs-section" hidden>
+            <h2 class="analysis-h">Code languages</h2>
+            <ul class="chip-list" id="lang-chips"></ul>
+          </section>
+
+          <!-- Table of contents -->
+          <section class="analysis-section" id="toc-section" hidden>
+            <h2 class="analysis-h">Contents</h2>
+            <nav class="toc" id="toc" aria-label="Table of contents"></nav>
+          </section>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="statusbar" role="contentinfo">
+      <span id="status-left">Ready.</span>
+      <span id="status-right">Markdown Reader</span>
+    </footer>
+  </div><!-- /.app-shell -->
+
+  <!-- ===== About / FAQ — human-readable content for readers, search engines and AI ===== -->
+  <section class="about" id="about" aria-label="About Markdown Reader">
+    <section>
+      <h2>About Markdown Reader</h2>
+      <p class="lede">
+        <strong>Markdown Reader</strong> is a free web app to <strong>read, live-preview and
+        analyze Markdown</strong>. Type or paste Markdown — or load it from any URL or GitHub
+        link — and instantly see the rendered output alongside a structured analysis: word
+        count, reading time, a table of contents, links, images, code blocks, task progress
+        and tables. It also exposes a small <strong>JSON analysis API</strong> so other
+        programs and AI agents can fetch and analyze Markdown programmatically. It is a more
+        feature-rich, themeable alternative to markdownlivepreview.com.
+      </p>
+    </section>
+
+    <section>
+      <h2>Features</h2>
+      <ul class="feature-grid">
+        <li><b>Live preview</b>A resizable split-pane editor renders Markdown as you type.</li>
+        <li><b>Load from URL</b>Fetch Markdown from any public URL; GitHub <code>blob</code> links are auto-converted to raw.</li>
+        <li><b>Analysis API</b>A documented JSON API returns counts, headings, links, code blocks and task progress.</li>
+        <li><b>Light &amp; dark</b>Theme toggle that remembers your choice, with system-preference default.</li>
+        <li><b>Safe rendering</b>HTML is sanitized server-side and client-side to prevent XSS.</li>
+        <li><b>Export &amp; embed</b>Copy HTML, download <code>.md</code>/<code>.html</code>, and embed in a webview with <code>?embed=1</code>.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Analysis API</h2>
+      <p>Markdown Reader is built around a small, stable HTTP API so you can automate Markdown analysis:</p>
+      <ul>
+        <li><code>POST /api/analyze</code> — send <code>{ "markdown": "…" }</code>, get back sanitized <code>html</code> plus an <code>analysis</code> object (word count, reading time, headings, links, images, code blocks, tasks, tables).</li>
+        <li><code>GET /api/fetch?url=…</code> — fetch Markdown from a URL (server-side, CORS-free) and get its raw text, sanitized HTML and analysis.</li>
+        <li><code>GET /api/health</code> — a simple health check.</li>
+      </ul>
+    </section>
+
+    <section class="faq">
+      <h2>Frequently asked questions</h2>
+
+      <details>
+        <summary>What is Markdown Reader?</summary>
+        <p>Markdown Reader is a free web app that renders a live preview of Markdown and computes a structured analysis of it (word count, reading time, headings, links, images, code blocks, tasks and tables). It also exposes a JSON HTTP API so other programs and AI agents can fetch and analyze Markdown programmatically.</p>
+      </details>
+
+      <details>
+        <summary>Can it read Markdown from a URL?</summary>
+        <p>Yes. On GitHub Pages, paste a CORS-enabled public Markdown URL (or a GitHub <code>blob</code> link, which is automatically rewritten to its raw form) and it is fetched directly in the browser, then rendered and analyzed. The optional API server can fetch server-side when CORS blocks browser reads.</p>
+      </details>
+
+      <details>
+        <summary>Does Markdown Reader have an API?</summary>
+        <p>Yes. <code>POST /api/analyze</code> accepts <code>{ markdown }</code> and returns sanitized HTML plus an analysis object. <code>GET /api/fetch?url=</code> fetches Markdown from a URL and returns its raw text, sanitized HTML and analysis. <code>GET /api/health</code> is a health check.</p>
+      </details>
+
+      <details>
+        <summary>How is it different from markdownlivepreview.com?</summary>
+        <p>Markdown Reader adds loading Markdown from a URL, a documented JSON analysis API, a table-of-contents and document-statistics panel, light/dark themes, export options, and an embeddable mode for webviews — with a different, more polished UI.</p>
+      </details>
+
+      <details>
+        <summary>Can I embed Markdown Reader in another app or webview?</summary>
+        <p>Yes. Add <code>?embed=1</code> to the URL to hide the surrounding chrome for a clean embed in an iframe or mobile webview. You can also pass <code>?url=</code> to auto-load a document and <code>?theme=dark</code> or <code>?theme=light</code> to force a theme.</p>
+      </details>
+    </section>
+
+    <p class="about-foot">
+      Markdown Reader is open source and part of the
+      <a href="https://github.com/DavisChang/web-tool" rel="noopener">web-tool</a> project.
+    </p>
+  </section>
+</body>
+</html>
