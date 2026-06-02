@@ -286,14 +286,66 @@
     return best || 'none';
   }
 
+  function stripMarkdown(text) {
+    return String(text || '')
+      .replace(/```[\s\S]*?```/g, ' ')
+      .replace(/`[^`]*`/g, ' ')
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/[*_~>#|[\]()-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function redactTelemetryText(text, maxLen) {
+    var s = stripMarkdown(text)
+      .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[email]')
+      .replace(/https?:\/\/\S+/gi, '[url]')
+      .replace(/\b(?:ghp|github_pat|sk|xox[baprs])-?[A-Za-z0-9_=-]{12,}\b/g, '[token]')
+      .replace(/\b[A-Za-z0-9_=-]{28,}\b/g, '[secret]')
+      .replace(/\b\d{5,}\b/g, '[number]');
+    return s.slice(0, maxLen || 80);
+  }
+
+  function titleGuess(md, analysis) {
+    var heading = (analysis.headings || [])[0];
+    if (heading && heading.text) return redactTelemetryText(heading.text, 80);
+    var lines = String(md || '').split('\n');
+    for (var i = 0; i < lines.length; i += 1) {
+      var line = lines[i].trim();
+      if (line) return redactTelemetryText(line, 80);
+    }
+    return 'empty';
+  }
+
+  function topicTerms(md) {
+    var stop = {
+      the: 1, and: 1, for: 1, with: 1, from: 1, this: 1, that: 1, you: 1, your: 1,
+      are: 1, can: 1, will: 1, not: 1, use: 1, using: 1, into: 1, have: 1, has: 1,
+      markdown: 1, reader: 1, true: 1, false: 1, null: 1, const: 1, function: 1,
+      var: 1, let: 1, return: 1
+    };
+    var words = redactTelemetryText(md, 1200)
+      .toLowerCase()
+      .match(/[a-z][a-z0-9_-]{2,}/g) || [];
+    var counts = {};
+    words.forEach(function (word) {
+      if (!stop[word]) counts[word] = (counts[word] || 0) + 1;
+    });
+    return Object.keys(counts)
+      .sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b); })
+      .slice(0, 6)
+      .join(',');
+  }
+
   function trackPaste(md) {
     if (typeof window.gtag !== 'function' || !window.MarkdownAnalyzer) return;
     var a;
     try { a = window.MarkdownAnalyzer.analyze(md); } catch (e) { return; }
 
-    // Do not send raw pasted content, headings, links, or snippets to GA.
-    // These aggregate fields are enough to understand broad content patterns
-    // without leaking private notes, credentials, emails, or customer data.
+    // Do not send raw pasted content to GA. Short text fields are sanitized,
+    // truncated, and redacted before they leave the browser.
     window.gtag('event', 'markdown_paste', {
       event_category: 'markdown_reader',
       char_bucket: bucketNumber(a.charCount, [100, 500, 2000, 10000, 50000]),
@@ -308,6 +360,8 @@
       task_done: (a.tasks && a.tasks.done) || 0,
       dominant_lang: dominantLanguage(a.codeBlocks),
       content_kind: detectContentKind(md, a),
+      title_guess: titleGuess(md, a),
+      topic_terms: topicTerms(md),
       has_frontmatter: /^---\s*[\s\S]*?\n---/m.test(md) ? 'yes' : 'no',
       has_inline_html: /<\/?[a-z][\s\S]*>/i.test(md) ? 'yes' : 'no'
     });
