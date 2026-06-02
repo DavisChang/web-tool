@@ -247,6 +247,72 @@
     }
   }
 
+  /* ---------------- Privacy-preserving paste telemetry ---------------- */
+  function bucketNumber(value, buckets) {
+    var n = Number(value || 0);
+    for (var i = 0; i < buckets.length; i += 1) {
+      if (n <= buckets[i]) return '<=' + buckets[i];
+    }
+    return '>' + buckets[buckets.length - 1];
+  }
+
+  function detectContentKind(md, analysis) {
+    var text = String(md || '').toLowerCase();
+    var hasInstall = /\b(install|installation|getting started|setup|usage|api|deploy)\b/.test(text);
+    var hasReadmeShape = /^#\s+.+/m.test(md) && hasInstall;
+    if (hasReadmeShape) return 'readme_or_docs';
+    if ((analysis.codeBlocks || []).length >= 2) return 'code_heavy';
+    if (analysis.tasks && analysis.tasks.total >= 3) return 'task_list';
+    if ((analysis.tables || 0) >= 2) return 'table_heavy';
+    if ((analysis.links || []).length >= 5) return 'link_collection';
+    if ((analysis.headings || []).length >= 3) return 'structured_notes';
+    return analysis.wordCount >= 80 ? 'prose' : 'short_note';
+  }
+
+  function dominantLanguage(codeBlocks) {
+    var counts = {};
+    (codeBlocks || []).forEach(function (block) {
+      var lang = block.lang || 'text';
+      counts[lang] = (counts[lang] || 0) + 1;
+    });
+    var best = '';
+    var bestCount = 0;
+    Object.keys(counts).forEach(function (lang) {
+      if (counts[lang] > bestCount) {
+        best = lang;
+        bestCount = counts[lang];
+      }
+    });
+    return best || 'none';
+  }
+
+  function trackPaste(md) {
+    if (typeof window.gtag !== 'function' || !window.MarkdownAnalyzer) return;
+    var a;
+    try { a = window.MarkdownAnalyzer.analyze(md); } catch (e) { return; }
+
+    // Do not send raw pasted content, headings, links, or snippets to GA.
+    // These aggregate fields are enough to understand broad content patterns
+    // without leaking private notes, credentials, emails, or customer data.
+    window.gtag('event', 'markdown_paste', {
+      event_category: 'markdown_reader',
+      char_bucket: bucketNumber(a.charCount, [100, 500, 2000, 10000, 50000]),
+      word_bucket: bucketNumber(a.wordCount, [20, 100, 500, 2000, 10000]),
+      line_bucket: bucketNumber(a.lineCount, [5, 20, 100, 500, 2000]),
+      heading_count: (a.headings || []).length,
+      link_count: (a.links || []).length,
+      image_count: (a.images || []).length,
+      table_count: a.tables || 0,
+      code_block_count: (a.codeBlocks || []).length,
+      task_total: (a.tasks && a.tasks.total) || 0,
+      task_done: (a.tasks && a.tasks.done) || 0,
+      dominant_lang: dominantLanguage(a.codeBlocks),
+      content_kind: detectContentKind(md, a),
+      has_frontmatter: /^---\s*[\s\S]*?\n---/m.test(md) ? 'yes' : 'no',
+      has_inline_html: /<\/?[a-z][\s\S]*>/i.test(md) ? 'yes' : 'no'
+    });
+  }
+
   /* ---------------- Load from URL (client-side fetch) ---------------- */
   // Rewrite a github.com/.../blob/... URL to its raw.githubusercontent.com form.
   function githubToRaw(target) {
@@ -412,6 +478,10 @@
     runAnalysis(editor.value);
 
     editor.addEventListener('input', scheduleUpdate);
+    editor.addEventListener('paste', function (e) {
+      var pasted = e.clipboardData && e.clipboardData.getData('text');
+      if (pasted) trackPaste(pasted);
+    });
 
     $('btn-theme').addEventListener('click', toggleTheme);
     $('btn-sample').addEventListener('click', loadSample);

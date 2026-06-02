@@ -6,8 +6,8 @@
 
   <!-- Content-Security-Policy: defense-in-depth for the static GitHub Pages app.
        connect-src allows loading Markdown from HTTPS raw/CDN URLs in the browser.
-       'unsafe-inline' is only needed for the JSON-LD structured-data block below. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https:; object-src 'none'; base-uri 'none'" />
+       'unsafe-inline' is needed for JSON-LD and the small GA bootstrap below. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https:; object-src 'none'; base-uri 'none'" />
 
   <!-- ===== Primary SEO ===== -->
   <title>Markdown Reader — live preview &amp; Markdown analysis API</title>
@@ -18,6 +18,15 @@
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0e1117" media="(prefers-color-scheme: dark)" />
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YGT8EVR31B"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YGT8EVR31B');
+  </script>
 
   <!-- Canonical. TODO: replace this base URL with your production domain on deploy. -->
   <link rel="canonical" href="https://davischang.github.io/web-tool/markdown-reader/" />
