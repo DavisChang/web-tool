@@ -1,2 +1,7 @@
 .env
 node_modules
+.v2t-cache
+voice_to_text/.venv
+voice_to_text/output/
+
+.DS_Store

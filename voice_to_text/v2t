@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Thin wrapper so voice_to_text can be called from anywhere:
+#   ~/code/web-tool/voice_to_text/v2t <source> [options]
+set -euo pipefail
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Prefer a local venv if one was created (see README), else the system python3.
+if [ -x "$DIR/.venv/bin/python" ]; then
+  PY="$DIR/.venv/bin/python"
+else
+  PY="${PYTHON:-python3}"
+fi
+
+exec "$PY" "$DIR/transcribe.py" "$@"
