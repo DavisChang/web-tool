@@ -11,5 +11,8 @@
   "dependencies": {
     "autocannon": "^7.9.0",
     "dotenv": "^16.0.1"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }
